@@ -1,5 +1,3 @@
 [
-    { "caption": "Open: Browse", "command": "open_browser" },
-    { "caption": "Open: Static files", "command": "open_static" },
-    { "caption": "Open: Reload static files", "command": "reload_static_files" }
+    { "caption": "Open: Browse", "command": "open_browse" }
 ]

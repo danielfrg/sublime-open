@@ -1,5 +1,7 @@
 {
-    "static_files": [],
-    "browser_starting_dirs": ["~"],
-    "default_filter_files": ["\\.DS_Store"],
+    // Files or directories to be shown at the begining
+    "bookmarks": ["~"],
+
+    // Ignore regex patters
+    "filter_regex": ["\\.DS_Store"]
 }
