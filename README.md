@@ -45,7 +45,6 @@ Under `Preferences > Package Settings > Open > Settings - User``
     "browser_starting_dirs": ["~/code", "~/Downloads"],
     "filter_files": ["\\.DS_Store", "\\.git"],
 }
-
 ```
 
 
