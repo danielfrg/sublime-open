@@ -1,0 +1,3 @@
+[
+    { "keys": ["ctrl+shift+o"], "command": "open_browse" }
+]
