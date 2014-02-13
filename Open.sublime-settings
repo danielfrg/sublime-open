@@ -1,0 +1,5 @@
+{
+    "static_files": [],
+    "browser_starting_dirs": ["~"],
+    "default_filter_files": ["\\.DS_Store"],
+}
