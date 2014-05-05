@@ -32,7 +32,7 @@ class OpenBrowseCommand(sublime_plugin.TextCommand):
                 self.items = [os.path.join(fname, f) for f in self.display]
                 self.show_panel()
             elif os.path.exists(fname):
-                self.view.window().open_file(fname, sublime.ENCODED_POSITION)
+                sublime.set_timeout(lambda: self.view.window().open_file(fname, sublime.ENCODED_POSITION), 0)
 
     def run(self, cmd):
         self.settings = sublime.load_settings(self.settings_file)
