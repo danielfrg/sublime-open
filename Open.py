@@ -28,7 +28,7 @@ class OpenBrowseCommand(sublime_plugin.TextCommand):
             fname = self.items[index]
             if os.path.isdir(fname):
                 self.currentdir = fname
-                self.display = [f for f in os.listdir(fname) if self.filter_files(f)]
+                self.display = [self.display_files(fname, f) for f in os.listdir(fname) if self.filter_files(f)]
                 self.items = [os.path.join(fname, f) for f in self.display]
                 self.show_panel()
             elif os.path.exists(fname):
@@ -48,6 +48,9 @@ class OpenBrowseCommand(sublime_plugin.TextCommand):
         self.items = [f for f in self.items if self.filter_files(f)]
 
         self.show_panel()
+
+    def display_files(self, fname, f):
+        return os.path.join(f, '') if os.path.isdir(os.path.join(fname, f)) else f
 
     def filter_files(self, fname):
         """
