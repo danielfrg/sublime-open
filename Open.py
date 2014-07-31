@@ -1,10 +1,9 @@
 import sublime
 import sublime_plugin
 
-import os
 import re
-
-from os.path import *
+import os
+from os.path import join, dirname, abspath, isdir, basename, expanduser, exists
 
 
 class OpenBrowseCommand(sublime_plugin.TextCommand):
@@ -23,7 +22,10 @@ class OpenBrowseCommand(sublime_plugin.TextCommand):
         """
         if index != -1:
             fname = self.items[index]
+            print(index, fname)
             if isdir(fname):
+                self.display = []
+                self.items = []
                 self.list_files(fname)
                 self.show_panel()
             elif exists(fname):
@@ -34,24 +36,39 @@ class OpenBrowseCommand(sublime_plugin.TextCommand):
 
         self.display = []
         self.items = []
-        fname = self.view.window().active_view().file_name()
-        if fname is not None:
-            self.list_files(dirname(fname))
+
+        # List bookmarks
         self.list_bookmarks()
+
+        # List current file (tab) directory
+        fname = self.view.window().active_view().file_name()
+        if self.settings.get('list_current_dir', True) and fname is not None:
+            self.list_files(dirname(fname))
+
         self.show_panel()
 
     def list_bookmarks(self):
         bookmarks = self.settings.get('bookmarks', list())
-        self.display = ['%d: %s' % (i + 1, f) for i, f in enumerate(bookmarks)] + self.display
+
+        bookmark_icon = self.settings.get('bookmark_prefix', '»')
+        if bookmark_icon == '%d':
+            self.display += ['%d: %s ' % (i, f) for i, f in enumerate(bookmarks)]
+        else:
+            self.display += [bookmark_icon + ' ' + f for f in bookmarks]
+
         bookmarks = [abspath(expanduser(f)) for f in bookmarks]
-        self.items = [f for f in bookmarks if self.filter_files(f)] + self.items
+        self.items += [f for f in bookmarks]
 
     def list_files(self, fname):
         self.currentdir = fname
-        self.display = [join(f, '') if isdir(join(fname, f)) else f for f in os.listdir(fname) if self.filter_files(f)]
-        self.items = [join(fname, f) for f in self.display]
-        self.display.insert(0, '..')
-        self.items.insert(0, abspath(join(self.currentdir, os.pardir)))
+
+        # Parent dir
+        self.display += ['..']
+        self.items +=  [abspath(join(self.currentdir, os.pardir))]
+
+        # List files and dirs
+        self.display += [join(f, '') if isdir(join(fname, f)) else f for f in os.listdir(fname) if self.filter_files(f)]
+        self.items += [join(fname, f) for f in os.listdir(fname) if self.filter_files(f)]
 
     def filter_files(self, fname):
         """
@@ -60,7 +77,7 @@ class OpenBrowseCommand(sublime_plugin.TextCommand):
         """
         fname = basename(fname)
         for regex in self.settings.get('filter_regex', list()):
-            regex = regex.replace('\\\\', '\\')  # Fix backslash scaping on json
+            regex = regex.replace('\\\\', '\\')  # Fix backslash escaping on json
             p = re.compile(regex)
             if p.match(fname) is not None:
                 return False
