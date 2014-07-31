@@ -22,7 +22,6 @@ class OpenBrowseCommand(sublime_plugin.TextCommand):
         """
         if index != -1:
             fname = self.items[index]
-            print(index, fname)
             if isdir(fname):
                 self.display = []
                 self.items = []
