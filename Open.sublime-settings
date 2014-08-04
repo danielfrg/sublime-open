@@ -1,13 +1,14 @@
 {
-    // Files or directories to be shown at the begining
+    // File or folder paths to show initially
     "bookmarks": ["~"],
 
-    // Bookmark identifier in the first panel. Can be "%d" to enumerate them
-    "bookmark_prefix": "»",
+    // String to decorate bookmarks ("#" expands to list index)
+    "bookmark_prefix": "◊",
 
-    // List the directory of the currently file (tab)
-    "list_current_dir": false,
+    // Show active tab's basedir after bookmarks
+    "list_working_dir": true,
 
-    // Ignore regex patters
-    "filter_regex": ["\\.DS_Store", "\\.git"]
+    // Control which files are listed in folders (defaults to Preferences.sublime-settings)
+    // "folder_exclude_patterns": [".svn", ".git", ".hg", "CVS"],
+    // "file_exclude_patterns": ["*.pyc", "*.pyo", "*.exe", "*.dll", "*.obj","*.o", "*.a", "*.lib", "*.so", "*.dylib", "*.ncb", "*.sdf", "*.suo", "*.pdb", "*.idb", ".DS_Store", "*.class", "*.psd", "*.db", "*.sublime-workspace"],
 }
