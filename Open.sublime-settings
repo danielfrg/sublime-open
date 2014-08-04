@@ -8,6 +8,9 @@
     // Show active tab's basedir after bookmarks
     "list_working_dir": true,
 
+    // Show folders before files
+    "list_dirs_first": true,
+
     // Control which files are listed in folders (defaults to Preferences.sublime-settings)
     // "folder_exclude_patterns": [".svn", ".git", ".hg", "CVS"],
     // "file_exclude_patterns": ["*.pyc", "*.pyo", "*.exe", "*.dll", "*.obj","*.o", "*.a", "*.lib", "*.so", "*.dylib", "*.ncb", "*.sdf", "*.suo", "*.pdb", "*.idb", ".DS_Store", "*.class", "*.psd", "*.db", "*.sublime-workspace"],

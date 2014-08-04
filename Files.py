@@ -38,9 +38,14 @@ class FilesList:
         self.add_files([join(basedir, pardir)], ['..'])
 
     def __glob(self, basedir):
-        return [join(basedir, f) for f in listdir(basedir) if self.__fnmatch(basedir, f)]
+        paths = [join(basedir, f) for f in listdir(basedir) if self.__fnmatch(basedir, f)]
+        return self.__sort(paths) if self.settings.list_dirs_first else paths
 
     def __fnmatch(self, basedir, fname):
         patterns = self.settings.folder_exclude_patterns if isdir(join(basedir, fname)) \
             else self.settings.file_exclude_patterns
         return not any([fnmatch(fname, p) for p in patterns])
+
+    def __sort(self, paths):
+        dirs = [f for f in paths if isdir(f)]
+        return dirs + [f for f in paths if not f in dirs]
