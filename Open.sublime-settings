@@ -3,7 +3,10 @@
     "bookmarks": ["~"],
 
     // String to decorate bookmarks ("#" expands to list index)
-    "bookmark_prefix": "◊",
+    "bookmark_prefix": "#:",
+
+    // Keep browsing after opening file
+    "persistent_browsing": true,
 
     // Show active tab's basedir after bookmarks
     "list_working_dir": true,

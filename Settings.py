@@ -1,7 +1,13 @@
 from sublime import load_settings
 
 class SettingsProxy:
-    keys = ['bookmarks', 'bookmark_prefix', 'list_working_dir', 'list_dirs_first']
+    keys = [
+	    'bookmarks',
+	    'bookmark_prefix',
+	    'persistent_browsing',
+	    'list_working_dir',
+	    'list_dirs_first',
+    ]
     app_keys = ['folder_exclude_patterns', 'file_exclude_patterns']
 
     def __init__(self):

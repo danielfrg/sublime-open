@@ -48,4 +48,4 @@ class FilesList:
 
     def __sort(self, paths):
         dirs = [f for f in paths if isdir(f)]
-        return dirs + [f for f in paths if not f in dirs]
+        return dirs + [f for f in paths if f not in dirs]

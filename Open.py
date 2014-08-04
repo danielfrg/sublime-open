@@ -32,6 +32,8 @@ class OpenBrowseCommand(TextCommand):
             self.list_dir(path)
         else:
             self.open_file(path)
+            if self.settings.persistent_browsing:
+                self.show_panel()
 
     def list_dir(self, path):
         self.files = FilesList(self.settings)
