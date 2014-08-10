@@ -1,46 +1,52 @@
-from os.path import isdir
+from os.path import dirname, isdir
 
 from sublime import ENCODED_POSITION, set_timeout
 from sublime_plugin import TextCommand
 
-from .Files import FilesList
+from .Files import Bookmarks, DirListing
 from .Settings import SettingsProxy
+from .Tools import Future
 
-class OpenBrowseCommand(TextCommand):
+class OpenBrowseCommand(TextCommand, SettingsProxy):
+
+    def working_dir(self):
+        return self.view.file_name() and dirname(self.view.file_name())
 
     def run(self, cmd):
-        self.settings = SettingsProxy()
-        self.files = FilesList(self.settings)
+        self.quick_panel = QuickPanelTask(self.view.window())
+        self.bind_settings(('persistent_browsing', 'list_active_folder'))
+        self.list_bookmarks()
 
-        self.files.add_bookmarks()
-        if self.settings.list_working_dir:
-            self.files.add_dir_contents(self.view.window().active_view().file_name())
+    def list_bookmarks(self):
+        files = Bookmarks()
+        if self._list_active_folder and self.working_dir():
+            files += DirListing(self.working_dir())
+        self.show_quick_panel(files)
 
-        self.show_panel()
+    def show_quick_panel(self, files):
+        self.quick_panel.show(files.labels(), files).then(self.open)
 
-    def show_panel(self):
-        show_panel = lambda: self.view.window().show_quick_panel(self.files.labels, self.open)
-        # XXX: https://github.com/danielfrg/sublime-open/issues/1
-        set_timeout(show_panel, 0)
-
-    def open(self, index):
-        if index is -1:
-            return
-        path = self.files.paths[index]
-
-        if isdir(path):
-            self.list_dir(path)
-        else:
-            self.open_file(path)
-            if self.settings.persistent_browsing:
-                self.show_panel()
+    def open(self, entry):
+        if isdir(entry.path):
+            return self.list_dir(entry.path)
+        self.open_file(entry.path)
+        if self._persistent_browsing:
+            self.open(entry._replace(path=dirname(entry.path)))
 
     def list_dir(self, path):
-        self.files = FilesList(self.settings)
-        self.files.add_dir_contents(path)
-        self.show_panel()
+        self.show_quick_panel(DirListing(path))
 
     def open_file(self, path):
-        open_file = lambda: self.view.window().open_file(path, ENCODED_POSITION)
-        # XXX: Why?
-        set_timeout(open_file, 0)
+        self.view.window().open_file(path, ENCODED_POSITION)
+
+class QuickPanelTask:
+
+    def __init__(self, window):
+        self.__window = window
+
+    def show(self, items, values=None):
+        def show(resolve, reject):
+            # XXX: https://github.com/danielfrg/sublime-open/issues/1
+            set_timeout(lambda: self.__window.show_quick_panel(items,
+                lambda i: reject() if i is -1 else resolve((values or items)[i])), 0)
+        return Future(show)

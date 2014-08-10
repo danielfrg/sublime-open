@@ -1,51 +1,52 @@
 from fnmatch import fnmatch
-from os import listdir, pardir
-from os.path import abspath, basename, dirname, expanduser, isdir, join
+from os import listdir
+from os.path import isdir, join, pardir
 
-class FilesList:
+from .FilesBase import _FilesCons, _FilesList
+from .Settings import SettingsProxy
 
-    def __init__(self, settings):
-        self.settings = settings
+class Bookmarks(_FilesList, SettingsProxy):
 
-        self.bookmark_format = self.settings.bookmark_prefix
-        for sub in [('{', '{{'), ('}', '}}'), ('#', '{1}')]:
-            self.bookmark_format = self.bookmark_format.replace(sub[0], sub[1])
-        self.bookmark_format = self.bookmark_format + ' {0}'
+    def __init__(self, paths=None, start_index=1):
+        self.__start_index = start_index
+        self.bind_settings(('bookmarks', 'bookmark_prefix'))
+        self.__label_format = self.__format_prefix(self._bookmark_prefix)
+        super().__init__(paths or self._bookmarks)
 
-        self.paths = []
-        self.labels = []
+    def _format_label(self, name, path, index):
+        return self.__label_format.format(name, index + self.__start_index)
 
-    def add_dir_contents(self, path):
-        if not path:
-            return
-        if not isdir(path):
-            path = dirname(path)
+    def __format_prefix(self, prefix):
+        for sub in (('{', '{{'), ('}', '}}'), ('#', '{1}')):
+            prefix = prefix.replace(sub[0], sub[1])
+        return prefix + ' {0}'
 
-        self.__add_dir_decorators(path)
-        format_dir_contents = lambda f, i: join(basename(f), '') if isdir(f) else basename(f)
-        self.add_files(self.__glob(path), format_dir_contents)
+class DirListing(_FilesCons):
 
-    def add_bookmarks(self):
-        self.add_files(self.settings.bookmarks, self.bookmark_format.format)
+    def __init__(self, path):
+        super().__init__(_DirDecorators(path), _DirContents(path))
 
-    def add_files(self, paths, labels_or_format_fn):
-        self.paths += [abspath(expanduser(f)) for f in paths]
-        if callable(labels_or_format_fn):
-            labels_or_format_fn = [labels_or_format_fn(f, i) for i, f in enumerate(paths)]
-        self.labels += labels_or_format_fn
+class _DirDecorators(_FilesList):
+    __decorators = (pardir,)
 
-    def __add_dir_decorators(self, basedir):
-        self.add_files([join(basedir, pardir)], ['..'])
+    def __init__(self, base_dir):
+        super().__init__(self.__decorators, base_dir)
 
-    def __glob(self, basedir):
-        paths = [join(basedir, f) for f in listdir(basedir) if self.__fnmatch(basedir, f)]
-        return self.__sort(paths) if self.settings.list_dirs_first else paths
+class _DirContents(_FilesList, SettingsProxy):
 
-    def __fnmatch(self, basedir, fname):
-        patterns = self.settings.folder_exclude_patterns if isdir(join(basedir, fname)) \
-            else self.settings.file_exclude_patterns
-        return not any([fnmatch(fname, p) for p in patterns])
+    def __init__(self, base_dir):
+        self.bind_settings(
+            plugin=('sort_folders_first',),
+            app=('folder_exclude_patterns', 'file_exclude_patterns'))
+        super().__init__(listdir(base_dir), base_dir)
 
-    def __sort(self, paths):
-        dirs = [f for f in paths if isdir(f)]
-        return dirs + [f for f in paths if f not in dirs]
+    def _filter_path(self, name, path):
+        patterns = self._folder_exclude_patterns if isdir(path) else self._file_exclude_patterns
+        # map() is lazy in Python 3 for short-circuit evaluation
+        return not any(map(lambda p: fnmatch(name, p), patterns))
+
+    def _format_label(self, name, path, index):
+        return join(name, '') if isdir(path) else name
+
+    def _sort_by(self, name, path, label):
+        return not isdir(path) if self._sort_folders_first else super()._sort_by(name, path, label)
