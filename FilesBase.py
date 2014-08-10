@@ -47,7 +47,7 @@ class _FilesList:
 
     def _sort_by(self, name, path, label):
         # preserve original order
-        return 0
+        return label.lower()
 
     def _reverse_sort(self):
         return False

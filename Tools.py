@@ -1,4 +1,12 @@
 from collections import namedtuple
+from os.path import abspath, expanduser, join
+
+def unexpanduser(path):
+    # FIXME: What about ~user? What about anchor?
+    path = abspath(expanduser(path))
+    user_home = join('~', '')
+    user_path = join(abspath(expanduser(user_home)), '')
+    return path.replace(user_path, user_home)
 
 # inspired by: http://stackoverflow.com/a/6849299
 class lazy:
@@ -57,8 +65,10 @@ class Future:
     def set_result(self, result=None):
         self.__set_done(result)
 
-    def set_exception(self, exception=None):
-        self.__set_done(exception=exception or Exception("DummyFuture unspecified exception"))
+    def set_exception(self, reason=None):
+        if not isinstance(reason, BaseException):
+            reason = Exception(reason or "DummyFuture unspecified reason")
+        self.__set_done(exception=reason)
 
     def __check_done(self):
         if not self.__done:

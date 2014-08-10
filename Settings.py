@@ -11,7 +11,11 @@ class SettingsProxy:
         for setting in plugin:
             setattr(self, '_{}'.format(setting), self._settings.plugin.get(setting))
         for setting in app:
-            value = self._settings.plugin.get(setting, self._settings.app.get(setting))
+            value = self._settings.app.get(setting)
+            if isinstance(value, list):
+                value = self._settings.plugin.get(setting, []) + value
+            else:
+                value = self._settings.plugin.get(setting, value)
             setattr(self, '_{}'.format(setting), value)
 
     @lazy

@@ -1,6 +1,6 @@
 from fnmatch import fnmatch
-from os import listdir
-from os.path import isdir, join, pardir
+from os import listdir, stat
+from os.path import basename, curdir, isdir, join, pardir, sep
 
 from .FilesBase import _FilesCons, _FilesList
 from .Settings import SettingsProxy
@@ -22,22 +22,27 @@ class Bookmarks(_FilesList, SettingsProxy):
         return prefix + ' {0}'
 
 class DirListing(_FilesCons):
+    # XXX: only here for access by .Open.OpenBrowseCommand#open_dir()
+    _filter_settings = ('folder_exclude_patterns', 'file_exclude_patterns')
 
     def __init__(self, path):
         super().__init__(_DirDecorators(path), _DirContents(path))
 
 class _DirDecorators(_FilesList):
-    __decorators = (pardir,)
+    __decorators = (curdir, pardir)
 
     def __init__(self, base_dir):
-        super().__init__(self.__decorators, base_dir)
+        super().__init__((curdir,) if base_dir == sep else self.__decorators, base_dir)
+
+    def _format_label(self, name, path, index):
+        return '{} [{}]'.format(name, join(basename(path), '') or sep)
 
 class _DirContents(_FilesList, SettingsProxy):
 
     def __init__(self, base_dir):
         self.bind_settings(
-            plugin=('sort_folders_first',),
-            app=('folder_exclude_patterns', 'file_exclude_patterns'))
+            plugin=('sort_folders_first', 'sort_by_timestamp'),
+            app=DirListing._filter_settings)
         super().__init__(listdir(base_dir), base_dir)
 
     def _filter_path(self, name, path):
@@ -49,4 +54,14 @@ class _DirContents(_FilesList, SettingsProxy):
         return join(name, '') if isdir(path) else name
 
     def _sort_by(self, name, path, label):
-        return not isdir(path) if self._sort_folders_first else super()._sort_by(name, path, label)
+        key = None
+        if self._sort_folders_first:
+            # (file, dir) = (1, 0)
+            key = int(not isdir(path))
+        if self._sort_by_timestamp:
+            # separate dirs by 3000 years in nanoseconds
+            key = key * 1e20 if key else 0
+            status = stat(path)
+            # adjust by most recent timestamp
+            key -= max(status.st_atime, status.st_mtime, status.st_ctime)
+        return super()._sort_by(name, path, label) if key is None else key

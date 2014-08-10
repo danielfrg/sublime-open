@@ -14,6 +14,12 @@
     // Show folders before files
     "sort_folders_first": true,
 
+    // Order most recently created, modified, or accessed first
+    "sort_by_timestamp": true
+
+    // Preview file contents when clicking on a file (defaults to Preferences.sublime-settings)
+    // "preview_on_click": true,
+
     // Control which files are listed in folders (defaults to Preferences.sublime-settings)
     // "folder_exclude_patterns": [".svn", ".git", ".hg", "CVS"],
     // "file_exclude_patterns": ["*.pyc", "*.pyo", "*.exe", "*.dll", "*.obj","*.o", "*.a", "*.lib", "*.so", "*.dylib", "*.ncb", "*.sdf", "*.suo", "*.pdb", "*.idb", ".DS_Store", "*.class", "*.psd", "*.db", "*.sublime-workspace"],
