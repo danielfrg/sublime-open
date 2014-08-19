@@ -1,25 +1,18 @@
-from collections import namedtuple
-
 from sublime import load_settings
 
-from .Tools import lazy
-
 class SettingsProxy:
-    __Chain = namedtuple('__Chain', 'plugin app')
+    keys = [
+	    'bookmarks',
+	    'bookmark_prefix',
+	    'persistent_browsing',
+	    'list_working_dir',
+	    'list_dirs_first',
+    ]
+    app_keys = ['folder_exclude_patterns', 'file_exclude_patterns']
 
-    def bind_settings(self, plugin=(), app=()):
-        for setting in plugin:
-            setattr(self, '_{}'.format(setting), self._settings.plugin.get(setting))
-        for setting in app:
-            value = self._settings.app.get(setting)
-            if isinstance(value, list):
-                value = self._settings.plugin.get(setting, []) + value
-            else:
-                value = self._settings.plugin.get(setting, value)
-            setattr(self, '_{}'.format(setting), value)
-
-    @lazy
-    def _settings(self):
-        return self.__Chain(
-            plugin=load_settings('Open.sublime-settings'),
-            app=load_settings('Preferences.sublime-settings'))
+    def __init__(self):
+        for key in self.keys + self.app_keys:
+            setattr(self, key, load_settings('Open.sublime-settings').get(key))
+        for key in self.app_keys:
+            if getattr(self, key) is None:
+                setattr(self, key, load_settings('Preferences.sublime-settings').get(key))
