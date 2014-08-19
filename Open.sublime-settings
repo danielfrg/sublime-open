@@ -8,17 +8,11 @@
     // Keep browsing after opening file
     "persistent_browsing": true,
 
-    // Show active tab's folder contents after bookmarks
-    "list_active_folder": true,
+    // Show active tab's basedir after bookmarks
+    "list_working_dir": true,
 
     // Show folders before files
-    "sort_folders_first": true,
-
-    // Order most recently created, modified, or accessed first
-    "sort_by_timestamp": true
-
-    // Preview file contents when clicking on a file (defaults to Preferences.sublime-settings)
-    // "preview_on_click": true,
+    "list_dirs_first": true,
 
     // Control which files are listed in folders (defaults to Preferences.sublime-settings)
     // "folder_exclude_patterns": [".svn", ".git", ".hg", "CVS"],
